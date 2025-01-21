@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  default:
+    desc: show commands
+    cmds:
+      - task -l --sort none
+
+  format:
+    desc: format code
+    cmds:
+      - uv run ruff format src tests
+  lint:
+    desc: lint code
+    cmds:
+      - uv run ruff check --fix src tests
+  typecheck:
+    desc: typecheck
+    cmds:
+      - uv run mypy src --ignore-missing-imports
+  qualify:
+    desc: qualify code
+    cmds:
+      - task format
+      - task lint
+      # - task typecheck
+  
