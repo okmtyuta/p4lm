@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "esm>=3.0.3",
+    "fair-esm>=2.0.0",
     "h5py>=3.12.1",
     "huggingface-hub>=0.27.0",
     "matplotlib>=3.10.0",
@@ -14,8 +14,11 @@ dependencies = [
     "polars>=1.18.0",
     "pytest>=8.3.4",
     "ruff>=0.8.4",
+    "schedulefree>=1.4",
+    "scipy>=1.15.1",
     "sqlalchemy>=2.0.37",
     "torch>=2.5.1",
+    "torchdiffeq>=0.2.5",
     "tqdm>=4.67.1",
 ]
 
