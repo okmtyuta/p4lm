@@ -9,11 +9,11 @@ tasks:
   format:
     desc: format code
     cmds:
-      - uv run ruff format src tests
+      - uv run ruff format src tests examples
   lint:
     desc: lint code
     cmds:
-      - uv run ruff check --fix src tests
+      - uv run ruff check --fix src tests examples
   typecheck:
     desc: typecheck
     cmds:

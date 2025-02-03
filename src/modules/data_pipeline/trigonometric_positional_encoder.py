@@ -1,7 +1,9 @@
-from src.modules.protein.protein import Protein
-from src.modules.data_pipeline.data_pipeline import DataPipe
-import torch
 import math
+
+import torch
+
+from src.modules.data_pipeline.data_pipeline import DataPipe
+from src.modules.protein.protein import Protein
 
 
 class TrigonometricPositionalEncoderCache:

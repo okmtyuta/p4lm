@@ -1,8 +1,6 @@
 import abc
 from typing import Literal
 
-import torch
-
 from src.modules.protein.protein import Protein, ProteinList
 
 AggregateMethod = Literal["mean"]
@@ -27,6 +25,3 @@ class DataPipeline:
             protein_list = pipe(protein_list=protein_list)
 
         return protein_list
-
-
-
