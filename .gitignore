@@ -11,8 +11,8 @@ wheels/
 .venv
 
 # data
-*.h5
-*.csv
+data
 
 # temporary
+temp
 *.temp.*
