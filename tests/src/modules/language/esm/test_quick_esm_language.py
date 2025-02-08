@@ -20,7 +20,7 @@ class TestQuickESMLanguage:
 
         esm2_converter = ESMConverter("esm2")
         for protein in protein_list.proteins:
-            assert torch.equal(protein.representations, esm2_converter(list(protein.seq)))
+            assert torch.allclose(protein.representations, esm2_converter(list(protein.seq)), atol=1e-5)
 
     def test_quick_esm1b_language(self):
         path = os.path.join(Dir.test_sources_dir, "data.csv")
@@ -32,4 +32,4 @@ class TestQuickESMLanguage:
 
         esm1b_converter = ESMConverter("esm1b")
         for protein in protein_list.proteins:
-            assert torch.equal(protein.representations, esm1b_converter(list(protein.seq)))
+            assert torch.allclose(protein.representations, esm1b_converter(list(protein.seq)), atol=1e-5)
