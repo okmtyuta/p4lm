@@ -32,9 +32,7 @@ class Logger:
         elif type == "debug":
             return Color.GREEN
 
-    def __logging(
-        self, text: str, type: LogType, prefix: str = "", suffix: str = ""
-    ) -> None:
+    def __logging(self, text: str, type: LogType, prefix: str = "", suffix: str = "") -> None:
         timestamp = datetime.datetime.now().isoformat()
         color = self.__font_color(type=type)
         text = f"{color}{timestamp}: [{self.__experiment_code}]{prefix}{text}{suffix}{Color.RESET}"

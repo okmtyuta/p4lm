@@ -24,4 +24,7 @@ tasks:
       - task format
       - task lint
       # - task typecheck
-  
+  test:
+    desc: run test
+    cmds:
+      - uv run python3 -m pytest

@@ -2,7 +2,7 @@ import abc
 
 import torch
 
-from src.modules.protein.protein import ProteinList
+from src.modules.protein.protein_list import ProteinList
 
 
 class _Language(metaclass=abc.ABCMeta):
