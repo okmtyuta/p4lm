@@ -2,12 +2,10 @@ import os
 
 import torch
 
+from src.lib.config.dir import Dir
+from src.modules.extract.language.esm.esm_converter import ESMConverter
 from src.modules.extract.language.quick_esm.quick_esm1b import QuickESM1bLanguage
 from src.modules.extract.language.quick_esm.quick_esm2 import QuickESM2Language
-from src.lib.config.dir import Dir
-from src.modules.extract.language.esm.esm1b import ESM1bLanguage
-from src.modules.extract.language.esm.esm2 import ESM2Language
-from src.modules.extract.language.esm.esm_converter import ESMConverter
 from src.modules.protein.protein_list import ProteinList
 
 

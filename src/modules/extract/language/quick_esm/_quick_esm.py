@@ -2,13 +2,10 @@ import os
 from typing import Literal, TypedDict
 
 import h5py
-import numpy as np
-import numpy.typing as npt
 import torch
 
-from src.modules.protein.protein_list import ProteinList
 from src.modules.extract.language._language import _Language
-from src.modules.extract.language.esm.esm_converter import ESMConverter
+from src.modules.protein.protein_list import ProteinList
 
 
 class _AminoAcidSource(TypedDict):
@@ -62,5 +59,3 @@ class _QuickESMLanguage(_Language):
             representations.append(representation)
 
         return torch.stack(representations)
-    
-

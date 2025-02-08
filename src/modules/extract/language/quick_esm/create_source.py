@@ -4,8 +4,6 @@ from typing import TypedDict
 import h5py
 
 from src.modules.extract.language.esm.esm_converter import ESMConverter
-from src.modules.extract.language.esm.esm1b import ESM1bLanguage
-from src.modules.extract.language.esm.esm2 import ESM2Language
 
 
 class _AminoAcidSource(TypedDict):
