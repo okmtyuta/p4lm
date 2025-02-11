@@ -44,10 +44,11 @@ class TestProtein:
             assert torch.equal(protein.representations, representations)
             assert torch.equal(protein.piped, piped)
 
-    def test_raise_exception(self):
-        source = {
+    def test_raise_exception(self) -> None:
+        source: ProteinSource = {
             "raw": {"seq": "DSGSDALRSGLTVPTSPKGRLL", "representations": None, "piped": None},
             "props": {"ccs": None, "rt": None, "length": None, "charge": None, "mass": None},
+            "key": "test",
         }
         protein = Protein(source=source)
         for name in protein_prop_names:

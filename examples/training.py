@@ -3,12 +3,12 @@ from schedulefree import RAdamScheduleFree
 from scipy.stats import pearsonr
 from tqdm import tqdm
 
-from src.modules.data_pipeline.aggregator import Aggregator
-from src.modules.data_pipeline.data_pipeline import DataPipeline
-from src.modules.data_pipeline.initial_pipe import InitialPipe
-from src.modules.data_pipeline.trigonometric_positional_encoder import (
+from modules.data_pipeline.initialize import InitialPipe
+from modules.data_pipeline.sinusoidal_positional_encoder import (
     TrigonometricPositionalEncoder,
 )
+from src.modules.data_pipeline.aggregator import Aggregator
+from src.modules.data_pipeline.data_pipeline import DataPipeline
 from src.modules.dataloader.dataloader import Dataloader
 from src.modules.model.architecture import Architecture
 from src.modules.model.configurable_model import ConfigurableModel

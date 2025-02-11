@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
-from src.modules.language._language import _Language
-from src.modules.protein.protein import ProteinList
+from src.modules.extract.language._language import _Language
+from src.modules.protein.protein_list import ProteinList
 
 
 class Extractor:

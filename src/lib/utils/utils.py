@@ -24,6 +24,13 @@ class Utils:
         return results
 
     @classmethod
+    def normalize(cls, items: list[float]):
+        denominator = sum(items)
+        normalized = [item / denominator for item in items]
+
+        return normalized
+
+    @classmethod
     def to_even_ratios(cls, target_size: int, unit_size: int):
         ratios = [unit_size / target_size] * (target_size // unit_size)
         ratios.append(1 - sum(ratios))

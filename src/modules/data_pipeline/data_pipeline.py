@@ -1,9 +1,7 @@
 import abc
-from typing import Literal
 
-from src.modules.protein.protein import Protein, ProteinList
-
-AggregateMethod = Literal["mean"]
+from src.modules.protein.protein import Protein
+from src.modules.protein.protein_list import ProteinList
 
 
 class DataPipe(metaclass=abc.ABCMeta):

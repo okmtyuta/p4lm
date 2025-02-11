@@ -6,7 +6,7 @@ from src.modules.data_pipeline.data_pipeline import DataPipe
 from src.modules.protein.protein import Protein
 
 
-class TrigonometricPositionalEncoderCache:
+class SinusoidalPositionalEncoderCache:
     def __init__(self) -> None:
         self._cache: dict[int, torch.Tensor] = {}
 
@@ -17,12 +17,12 @@ class TrigonometricPositionalEncoderCache:
         self._cache[length] = value
 
 
-class TrigonometricPositionalEncoder(DataPipe):
+class SinusoidalPositionalEncoder(DataPipe):
     def __init__(self, a: float, b: float, gamma: float) -> None:
         self._a = a
         self._b = b
         self._gamma = gamma
-        self._cache = TrigonometricPositionalEncoderCache()
+        self._cache = SinusoidalPositionalEncoderCache()
 
     def _act(self, protein: Protein):
         piped = protein.representations * self._positional_tensor(length=protein.length)
@@ -61,12 +61,12 @@ class TrigonometricPositionalEncoder(DataPipe):
         return torch.Tensor(positional_vectors)
 
 
-class ReversedTrigonometricPositionalEncoder(DataPipe):
+class ReversedSinusoidalPositionalEncoder(DataPipe):
     def __init__(self, a: float, b: float, gamma: float) -> None:
         self._a = a
         self._b = b
         self._gamma = gamma
-        self._cache = TrigonometricPositionalEncoderCache()
+        self._cache = SinusoidalPositionalEncoderCache()
 
     def _act(self, protein: Protein):
         piped = protein.representations * self._positional_tensor(length=protein.length)
@@ -105,15 +105,15 @@ class ReversedTrigonometricPositionalEncoder(DataPipe):
         return torch.Tensor(positional_vectors)
 
 
-class BidirectionalTrigonometricPositionalEncoder(DataPipe):
+class BidirectionalSinusoidalPositionalEncoder(DataPipe):
     def __init__(self, a: float, b: float, gamma: float) -> None:
         self._a = a
         self._b = b
         self._gamma = gamma
-        self._normal = TrigonometricPositionalEncoder(a=a, b=b, gamma=gamma)
-        self._reversed = ReversedTrigonometricPositionalEncoder(a=a, b=b, gamma=gamma)
+        self._normal = SinusoidalPositionalEncoder(a=a, b=b, gamma=gamma)
+        self._reversed = ReversedSinusoidalPositionalEncoder(a=a, b=b, gamma=gamma)
 
-        self._cache = TrigonometricPositionalEncoderCache()
+        self._cache = SinusoidalPositionalEncoderCache()
 
     def _act(self, protein: Protein):
         representations = torch.concat([protein.representations, protein.representations], dim=1)
