@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fair-esm>=2.0.0",
+    "fastexcel>=0.13.0",
     "h5py>=3.12.1",
     "huggingface-hub>=0.27.0",
     "matplotlib>=3.10.0",
@@ -20,6 +21,7 @@ dependencies = [
     "torch>=2.5.1",
     "torchdiffeq>=0.2.5",
     "tqdm>=4.67.1",
+    "types-requests>=2.32.0.20250328",
 ]
 
 [tool.ruff.lint]

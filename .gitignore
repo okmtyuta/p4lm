@@ -16,3 +16,6 @@ data
 # temporary
 temp
 *.temp.*
+
+# secret
+secret

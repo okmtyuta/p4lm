@@ -50,6 +50,10 @@ class Protein:
     def props(self):
         return self._source["props"]
 
+    @property
+    def length(self):
+        return len(self._source["raw"]["seq"])
+
     def read_props(self, name: ProteinPropName):
         prop = self._source["props"][name]
         if prop is None:

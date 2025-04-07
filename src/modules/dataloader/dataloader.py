@@ -138,6 +138,10 @@ class Dataloader:
     def batches(self):
         return self._generate_batch()
 
+    @property
+    def state(self):
+        return self._state
+
     def _generate_batch(self):
         if self._batches is not None:
             return self._batches
