@@ -7,26 +7,30 @@ class Criterion:
         self._mse_loss = torch.nn.MSELoss()
         self._l1_loss = torch.nn.L1Loss()
 
-    def mean_squared_error(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        loss: torch.Tensor = self._mse_loss(output, target)
+    def root_mean_squared_error(self, output: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+        loss: torch.Tensor = self.mean_squared_error(output=output, label=label).sqrt()
         return loss
 
-    def mean_absolute_error(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        loss: torch.Tensor = self._l1_loss(output, target)
+    def mean_squared_error(self, output: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+        loss: torch.Tensor = self._mse_loss(output, label)
         return loss
 
-    def pearsonr(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        correlation = stats.pearsonr(output.detach(), target.detach()).correlation
-        return torch.from_numpy(correlation)
+    def mean_absolute_error(self, output: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+        loss: torch.Tensor = self._l1_loss(output, label)
+        return loss
 
-    # def delta(self, output: torch.Tensor, target: torch.Tensor, alpha: float = 0.95):
+    def pearsonr(self, output: torch.Tensor, label: torch.Tensor):
+        correlation = stats.pearsonr(output.detach(), label.detach()).correlation
+        return correlation
+
+    # def delta(self, output: torch.Tensor, label: torch.Tensor, alpha: float = 0.95):
     #     output_mean = torch.mean(output)
-    #     target_mean = torch.mean(target)
+    #     label_mean = torch.mean(label)
     #     output_var = torch.var(output)
-    #     target_var = torch.var(target)
+    #     label_var = torch.var(label)
 
-    #     diff = output_mean - target_mean
-    #     upper = diff + 1.96 * torch.sqrt((output_var / len(output)) + (target_var / len(target)))
-    #     lower = diff - 1.96 * torch.sqrt((output_var / len(output)) + (target_var / len(target)))
+    #     diff = output_mean - label_mean
+    #     upper = diff + 1.96 * torch.sqrt((output_var / len(output)) + (label_var / len(label)))
+    #     lower = diff - 1.96 * torch.sqrt((output_var / len(output)) + (label_var / len(label)))
 
     #     print(lower, upper)
