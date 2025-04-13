@@ -1,4 +1,5 @@
-import h5py
+from typing import Optional
+
 import torch
 from tqdm import tqdm
 
@@ -9,86 +10,61 @@ from src.modules.train.criterion import Criterion
 from src.modules.train.types import EpochResult, PropEpochResult
 
 
-class EpochResultList:
-    def __init__(self, raw: list[EpochResult]):
-        self._raw = raw
+class TrainRecorder:
+    def __init__(self):
+        self._current_epoch = 1
+        self._max_accuracy_epoch_result: Optional[EpochResult] = None
+
+        self._train_results: list[EpochResult] = []
+        self._evaluate_results: list[EpochResult] = []
 
     @property
-    def raw(self):
-        return self._raw
+    def current_epoch(self):
+        return self._current_epoch
 
-    def append(self, result: EpochResult):
-        self._raw.append(result)
+    @property
+    def max_accuracy_epoch_result(self):
+        if self._max_accuracy_epoch_result is None:
+            raise Exception
+        return self._max_accuracy_epoch_result
 
-    def save_as_hdf5(self, path: str):
-        with h5py.File(name=path, mode="w") as f:
-            f.create_group("result")
-            print("result saving...")
-            for epoch_result in tqdm(self._raw):
-                epoch_group = f.create_group(f'result/{epoch_result["epoch"]}')
-                epoch_group_attrs = epoch_group.attrs
-                epoch_group_attrs["epoch"] = epoch_result["epoch"]
+    def next_epoch(self):
+        self._current_epoch += 1
 
-                for result in epoch_result["results"]:
-                    prop_group = f.create_group(f'result/{epoch_result["epoch"]}/{result['prop_name']}')
-                    f.create_dataset(
-                        f'result/{epoch_result["epoch"]}/{result['prop_name']}/output', data=result["output"]
-                    )
-                    f.create_dataset(
-                        f'result/{epoch_result["epoch"]}/{result['prop_name']}/label', data=result["label"]
-                    )
-                    prop_group_attrs = prop_group.attrs
-                    prop_group_attrs["pearsonr"] = result["pearsonr"]
-                    prop_group_attrs["mean_squared_error"] = result["mean_squared_error"]
-                    prop_group_attrs["root_mean_squared_error"] = result["root_mean_squared_error"]
-                    prop_group_attrs["mean_absolute_error"] = result["mean_absolute_error"]
+    def append_train_results(self, train_epoch_result: EpochResult):
+        self._train_results.append(train_epoch_result)
 
-    @classmethod
-    def from_hdf5(cls, path: str):
-        with h5py.File(path, mode="r") as f:
-            raw: list[EpochResult] = []
+    def append_evaluate_results(self, evaluate_epoch_result: EpochResult):
+        self._evaluate_results.append(evaluate_epoch_result)
 
-            epoch_keys = f["result"].keys()
-            print("result loading...")
-            for epoch_key in tqdm(epoch_keys):
-                epoch_group = f[f"result/{epoch_key}"]
-                epoch_group_attrs = epoch_group.attrs
-                epoch = epoch_group_attrs["epoch"]
+    def is_max_accuracy_epoch_result(self, epoch_result: EpochResult):
+        pearsonrs = map(lambda result: result["pearsonr"], epoch_result["results"])
+        accuracy = sum(pearsonrs)
 
-                prop_names = epoch_group.keys()
-                prop_epoch_results: list[PropEpochResult] = []
-                for prop_name in prop_names:
-                    prop_group = f[f"result/{epoch_key}/{prop_name}"]
-                    output = f[f"result/{epoch_key}/{prop_name}/output"]
-                    label = f[f"result/{epoch_key}/{prop_name}/label"]
+        if self._max_accuracy_epoch_result is None:
+            return True
 
-                    prop_group_attrs = prop_group.attrs
-                    pearsonr = prop_group_attrs["pearsonr"]
-                    mean_squared_error = prop_group_attrs["mean_squared_error"]
-                    root_mean_squared_error = prop_group_attrs["root_mean_squared_error"]
-                    mean_absolute_error = prop_group_attrs["mean_absolute_error"]
+        max_accuracy_pearsonrs = map(lambda result: result["pearsonr"], self._max_accuracy_epoch_result["results"])
+        max_accuracy = sum(max_accuracy_pearsonrs)
 
-                    prop_epoch_result: PropEpochResult = {
-                        "prop_name": prop_name,
-                        "label": label,
-                        "output": output,
-                        "pearsonr": pearsonr,
-                        "mean_squared_error": mean_squared_error,
-                        "root_mean_squared_error": root_mean_squared_error,
-                        "mean_absolute_error": mean_absolute_error,
-                    }
-                    prop_epoch_results.append(prop_epoch_result)
+        return accuracy > max_accuracy
 
-                epoch_result: EpochResult = {"epoch": epoch, "results": prop_epoch_results}
-                raw.append(epoch_result)
+    def set_as_accuracy_epoch_result(self, epoch_result: EpochResult):
+        self._max_accuracy_epoch_result = epoch_result
 
-        return EpochResultList(raw=raw)
+    def to_continue(self):
+        if self._max_accuracy_epoch_result is None:
+            return True
+
+        max_accuracy_epoch = self._max_accuracy_epoch_result["epoch"]
+        return self._current_epoch - max_accuracy_epoch < 500
 
 
 class Trainer:
     def __init__(self, model: ConfigurableModel, dataloader: Dataloader):
         self._model = model
-        self._current_epoch = 1
+        self._recorder = TrainRecorder()
+
         self._dataloader = dataloader
         self._train_loader, self._evaluate_loader, self._validate_loader = self._dataloader.rational_split(
             [0.8, 0.1, 0.1]
@@ -112,14 +88,14 @@ class Trainer:
                 "prop_name": prop_name,
                 "output": output.tolist(),
                 "label": label.tolist(),
-                "pearsonr": pearsonr,
+                "pearsonr": pearsonr.item(),
                 "mean_squared_error": mean_squared_error.item(),
                 "root_mean_squared_error": root_mean_squared_error.item(),
                 "mean_absolute_error": mean_absolute_error.item(),
             }
             epoch_results_by_target.append(result)
 
-        epoch_result: EpochResult = {"epoch": self._current_epoch, "results": epoch_results_by_target}
+        epoch_result: EpochResult = {"epoch": self._recorder.current_epoch, "results": epoch_results_by_target}
         return epoch_result
 
     def _batch_train(self, batch: DataBatch):
@@ -171,24 +147,28 @@ class Trainer:
         epoch_evaluate_result = self._create_epoch_results(labels=labels, outputs=outputs)
         return epoch_evaluate_result
 
-    def _to_be_continued(self):
-        return self._current_epoch < 500
+    def _post_epoch_evaluate(self, epoch_evaluate_result: EpochResult):
+        if self._recorder.is_max_accuracy_epoch_result(epoch_result=epoch_evaluate_result):
+            self._recorder.set_as_accuracy_epoch_result(epoch_result=epoch_evaluate_result)
 
     def train(self) -> None:
-        train_result_list = EpochResultList(raw=[])
-        evaluate_result_list = EpochResultList(raw=[])
-        while self._to_be_continued():
+        while self._recorder.to_continue():
             for i in tqdm(range(500)):
                 train_epoch_result = self._epoch_train()
-                train_result_list.append(train_epoch_result)
+                self._recorder.append_train_results(train_epoch_result=train_epoch_result)
 
                 evaluate_epoch_result = self._epoch_evaluate()
-                evaluate_result_list.append(evaluate_epoch_result)
+                self._recorder.append_evaluate_results(evaluate_epoch_result=evaluate_epoch_result)
+                self._post_epoch_evaluate(epoch_evaluate_result=evaluate_epoch_result)
 
                 for r in evaluate_epoch_result["results"]:
-                    print(r["prop_name"], r["pearsonr"])
+                    mae = self._recorder._max_accuracy_epoch_result["epoch"]
+                    ce = self._recorder._current_epoch
+                    print(f'Current epoch is {ce}, {r["prop_name"]} pearson: {r["pearsonr"]}')
+                mape = map(lambda r: r["pearsonr"], self._recorder.max_accuracy_epoch_result["results"])
+                print(f'Max accuracy epoch is {mae}, {r["prop_name"]} pearson: {list(mape)}')
 
-                self._current_epoch += 1
+                self._recorder.next_epoch()
 
         # train_result_list.save_as_hdf5("train-test.h5")
         # evaluate_result_list.save_as_hdf5("evaluate-test.h5")
